@@ -1,4 +1,4 @@
--- Create tables with unique constraints
+-- Create tables
 CREATE TABLE
     IF NOT EXISTS department (
         id SERIAL PRIMARY KEY,
@@ -23,10 +23,10 @@ CREATE TABLE
         manager_id INTEGER,
         FOREIGN KEY (role_id) REFERENCES role (id),
         FOREIGN KEY (manager_id) REFERENCES employee (id),
-        UNIQUE (first_name, last_name) -- Ensure employee name combination is unique
+        UNIQUE (first_name, last_name)
     );
 
--- Insert data with conflict resolution
+-- Insert data and Ignore duplicates
 INSERT INTO
     department (name)
 VALUES
