@@ -1,3 +1,5 @@
+const inquirer = require('inquirer');
+
 const viewDepartments = async (client, callback) => {
   const res = await client.query('SELECT * FROM department');
   console.table(res.rows);
@@ -32,10 +34,20 @@ const addDepartment = async (client, callback) => {
     type: 'input',
     message: 'Enter department name:',
   });
-  await client.query('INSERT INTO department (name) VALUES ($1) ON CONFLICT (name) DO NOTHING', [
+
+  // Check if the department already exists
+  const existingDepartment = await client.query('SELECT id FROM department WHERE name = $1', [
     name,
   ]);
-  console.log(`Added department: ${name}`);
+
+  if (existingDepartment.rows.length === 0) {
+    // Department does not exist, insert a new record
+    await client.query('INSERT INTO department (name) VALUES ($1)', [name]);
+    console.log(`Added department: ${name}`);
+  } else {
+    console.log(`Department '${name}' already exists. Skipping insertion.`);
+  }
+
   callback();
 };
 
@@ -45,11 +57,22 @@ const addRole = async (client, callback) => {
     { name: 'salary', type: 'input', message: 'Enter role salary:' },
     { name: 'department_id', type: 'input', message: 'Enter department ID:' },
   ]);
-  await client.query(
-    'INSERT INTO role (title, salary, department_id) VALUES ($1, $2, $3) ON CONFLICT (title) DO NOTHING',
-    [title, salary, department_id]
-  );
-  console.log(`Added role: ${title}`);
+
+  // Check if the role already exists
+  const existingRole = await client.query('SELECT id FROM role WHERE title = $1', [title]);
+
+  if (existingRole.rows.length === 0) {
+    // Role does not exist, insert a new record
+    await client.query('INSERT INTO role (title, salary, department_id) VALUES ($1, $2, $3)', [
+      title,
+      salary,
+      department_id,
+    ]);
+    console.log(`Added role: ${title}`);
+  } else {
+    console.log(`Role '${title}' already exists. Skipping insertion.`);
+  }
+
   callback();
 };
 
@@ -60,11 +83,24 @@ const addEmployee = async (client, callback) => {
     { name: 'role_id', type: 'input', message: 'Enter role ID:' },
     { name: 'manager_id', type: 'input', message: 'Enter manager ID (if any):', default: null },
   ]);
-  await client.query(
-    'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4) ON CONFLICT (first_name, last_name) DO NOTHING',
-    [first_name, last_name, role_id, manager_id]
+
+  // Check if the employee already exists
+  const existingEmployee = await client.query(
+    'SELECT id FROM employee WHERE first_name = $1 AND last_name = $2',
+    [first_name, last_name]
   );
-  console.log(`Added employee: ${first_name} ${last_name}`);
+
+  if (existingEmployee.rows.length === 0) {
+    // Employee does not exist, insert a new record
+    await client.query(
+      'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)',
+      [first_name, last_name, role_id, manager_id]
+    );
+    console.log(`Added employee: ${first_name} ${last_name}`);
+  } else {
+    console.log(`Employee '${first_name} ${last_name}' already exists. Skipping insertion.`);
+  }
+
   callback();
 };
 

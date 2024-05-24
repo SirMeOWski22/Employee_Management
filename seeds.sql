@@ -20,7 +20,7 @@ CREATE TABLE
         first_name VARCHAR(30) NOT NULL,
         last_name VARCHAR(30) NOT NULL,
         role_id INTEGER NOT NULL,
-        manager_id INTEGER,
+        manager_id VARCHAR(30) DEFAULT '',
         FOREIGN KEY (role_id) REFERENCES role (id),
         FOREIGN KEY (manager_id) REFERENCES employee (id),
         UNIQUE (first_name, last_name)
@@ -48,9 +48,9 @@ SELECT
 FROM
     (
         VALUES
-            ('Ashley', 'Morgan', 1, NULL),
-            ('Michael', 'Parsons', 2, 1),
-            ('Sue', 'Byrd', 3, NULL)
+            ('Ashley', 'Morgan', 1, 2),
+            ('Michael', 'Parsons', 2, NULL),
+            ('Sue', 'Byrd', 3, 2)
     ) AS data (first_name, last_name, role_id, manager_id)
 WHERE
     NOT EXISTS (
